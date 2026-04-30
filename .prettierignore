@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+coverage
+*.db
+*.db-journal
+uploads
+package-lock.json
+backend/data
