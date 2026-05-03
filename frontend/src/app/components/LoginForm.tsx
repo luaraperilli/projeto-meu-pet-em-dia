@@ -47,15 +47,17 @@ export function LoginForm() {
             boxShadow: 'var(--shadow-xl)',
           }}
         >
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <div
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            <img
+              src="/logo-completa.jpeg"
+              alt="Meu Pet em Dia"
               style={{
-                fontSize: '48px',
-                marginBottom: '16px',
+                maxWidth: '180px',
+                width: '100%',
+                height: 'auto',
+                marginBottom: '8px',
               }}
-            >
-              🐾
-            </div>
+            />
             <h1
               style={{
                 fontFamily: 'var(--font-primary)',
@@ -64,6 +66,14 @@ export function LoginForm() {
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 marginBottom: '8px',
+                position: 'absolute',
+                width: 1,
+                height: 1,
+                padding: 0,
+                overflow: 'hidden',
+                clip: 'rect(0, 0, 0, 0)',
+                whiteSpace: 'nowrap',
+                border: 0,
               }}
             >
               Meu Pet em Dia
@@ -121,9 +131,9 @@ export function LoginForm() {
             </div>
 
             <div style={{ textAlign: 'right', marginBottom: '24px' }}>
-              <a href="#" style={{ fontSize: 'var(--text-sm)', color: 'var(--primary)' }}>
+              <Link to="/esqueci-senha" style={{ fontSize: 'var(--text-sm)', color: 'var(--primary)' }}>
                 Esqueci minha senha
-              </a>
+              </Link>
             </div>
 
             <button

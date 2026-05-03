@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { API_BASE_URL } from '@lib/api';
 import { Pet, PetSpecies } from '../../types/Pet';
+import { PetAccessModal } from './PetAccessModal';
 
 export function PetList({ onEdit, onRefresh }: { onEdit: (p: Pet) => void; onRefresh: () => void }) {
   const [pets, setPets] = useState<Pet[]>([]);
@@ -8,6 +9,7 @@ export function PetList({ onEdit, onRefresh }: { onEdit: (p: Pet) => void; onRef
   const [error, setError] = useState('');
   const [name, setName] = useState('');
   const [species, setSpecies] = useState<'Todos' | PetSpecies>('Todos');
+  const [accessPet, setAccessPet] = useState<Pet | null>(null);
 
   async function load() {
     setLoading(true);
@@ -148,21 +150,28 @@ export function PetList({ onEdit, onRefresh }: { onEdit: (p: Pet) => void; onRef
                   <td style={{ padding: 12 }}>{p.sex || '-'}</td>
                   <td style={{ padding: 12 }}>{p.age != null ? `${p.age} ano(s)` : '-'}</td>
                   <td style={{ padding: 12, textAlign: 'center' }}>
-                    <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                    <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
                       <button
                         data-testid={`pet-edit-${p.id}`}
                         onClick={() => onEdit(p)}
-                        style={{ padding: '8px 16px', fontSize: 'var(--text-xs)' }}
+                        style={{ padding: '8px 12px', fontSize: 'var(--text-xs)' }}
                       >
-                        ✏️ Editar
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => setAccessPet(p)}
+                        style={{ padding: '8px 12px', fontSize: 'var(--text-xs)' }}
+                        title="Gerenciar acessos de veterinários"
+                      >
+                        Acessos
                       </button>
                       <button
                         data-testid={`pet-delete-${p.id}`}
                         className="danger"
                         onClick={() => onDelete(p.id)}
-                        style={{ padding: '8px 16px', fontSize: 'var(--text-xs)' }}
+                        style={{ padding: '8px 12px', fontSize: 'var(--text-xs)' }}
                       >
-                        🗑️ Excluir
+                        Excluir
                       </button>
                     </div>
                   </td>
@@ -172,6 +181,8 @@ export function PetList({ onEdit, onRefresh }: { onEdit: (p: Pet) => void; onRef
           </table>
         </div>
       )}
+
+      <PetAccessModal isOpen={!!accessPet} onClose={() => setAccessPet(null)} pet={accessPet} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { API_BASE_URL } from '@lib/api';
+import { useAuth } from '@app/providers/AuthProvider';
 import { useToast } from './Toast';
 import { RegistroSaude, TipoRegistro } from '../../types/RegistroSaude';
 import { Pet } from '../../types/Pet';
@@ -21,6 +22,7 @@ interface RegistroSaudeFormProps {
 }
 
 export function RegistroSaudeForm({ registro, onSuccess, onCancel }: RegistroSaudeFormProps) {
+  const { user } = useAuth();
   const { showToast, ToastComponent } = useToast();
   const [form, setForm] = useState<FormState>({
     petId: '',
@@ -102,7 +104,9 @@ export function RegistroSaudeForm({ registro, onSuccess, onCancel }: RegistroSau
       setLoadingPets(true);
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`${API_BASE_URL}/pets`, { headers: { Authorization: `Bearer ${token}` } });
+        const url =
+          user?.type === 'Veterinário' ? `${API_BASE_URL}/pet-access/shared-with-me` : `${API_BASE_URL}/pets`;
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         setPets(Array.isArray(data) ? data : []);
       } catch {
@@ -112,7 +116,7 @@ export function RegistroSaudeForm({ registro, onSuccess, onCancel }: RegistroSau
       }
     };
     fetchPets();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (registro && !loadingPets) {

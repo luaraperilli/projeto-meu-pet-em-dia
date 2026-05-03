@@ -7,6 +7,16 @@ import { AdminUsersPage } from '@app/components/AdminUsersPage';
 import { PetsPage } from '@app/components/PetsPage';
 import { AgendaPage } from '@app/components/AgendaPage';
 import { RegistroSaudePage } from '@app/components/RegistroSaudePage';
+import { FinanceiroPage } from '@app/components/FinanceiroPage';
+import { SuprimentoPage } from '@app/components/SuprimentoPage';
+import { AvaliacaoPage } from '@app/components/AvaliacaoPage';
+import { RelatoriosPage } from '@app/components/RelatoriosPage';
+import { NotificacoesPage } from '@app/components/NotificacoesPage';
+import { PetsCompartilhadosPage } from '@app/components/PetsCompartilhadosPage';
+import { PerfilPage } from '@app/components/PerfilPage';
+import { EsqueciSenhaPage } from '@app/components/EsqueciSenhaPage';
+import { ResetarSenhaPage } from '@app/components/ResetarSenhaPage';
+import { TermosPage } from '@app/components/TermosPage';
 
 function Protected({ children }: { children: JSX.Element }) {
   const { user } = useAuth();
@@ -31,53 +41,100 @@ function TutorOnly({ children }: { children: JSX.Element }) {
   return children;
 }
 
+function VetOnly({ children }: { children: JSX.Element }) {
+  const { user } = useAuth();
+  const location = useLocation();
+  if (!user) return <Navigate to="/login" replace state={{ from: location }} />;
+  if (user.type !== 'Veterinário') return <Navigate to="/" replace />;
+  return children;
+}
+
 function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isTutor = user?.type === 'Tutor';
+  const isVet = user?.type === 'Veterinário';
 
-  const dashboardCards = [
-    {
-      icon: '🐾',
-      title: 'Meus Pets',
-      subtitle: 'Cadastre e gerencie seus pets',
-      color: 'linear-gradient(135deg, #FF6B9D, #E8538A)',
-      stats: '0 pets cadastrados',
-      path: '/pets',
-    },
-    {
-      icon: '📅',
-      title: 'Agenda',
-      subtitle: 'Vacinas, consultas e lembretes',
-      color: 'linear-gradient(135deg, #4ECDC4, #3BB5AC)',
-      stats: 'Próximos 7 dias',
-      path: '/agenda',
-    },
-    {
-      icon: '💉',
-      title: 'Registros de Saúde',
-      subtitle: 'Histórico e próximos reforços',
-      color: 'linear-gradient(135deg, #FFE66D, #F5D942)',
-      stats: 'Tudo em dia',
-      path: '/registros-saude',
-    },
-    {
-      icon: '💰',
-      title: 'Financeiro',
-      subtitle: 'Controle de gastos',
-      color: 'linear-gradient(135deg, #6BCF7F, #52B869)',
-      stats: 'Em breve',
-      path: '/financeiro',
-    },
-  ];
+  const dashboardCards = isTutor
+    ? [
+        {
+          icon: '🐾',
+          title: 'Meus Pets',
+          subtitle: 'Cadastre e gerencie seus pets',
+          color: 'linear-gradient(135deg, #FF6B9D, #E8538A)',
+          path: '/pets',
+        },
+        {
+          icon: '📅',
+          title: 'Agenda',
+          subtitle: 'Vacinas, consultas e lembretes',
+          color: 'linear-gradient(135deg, #4ECDC4, #3BB5AC)',
+          path: '/agenda',
+        },
+        {
+          icon: '💉',
+          title: 'Registros de Saúde',
+          subtitle: 'Histórico e próximos reforços',
+          color: 'linear-gradient(135deg, #FFE66D, #F5D942)',
+          path: '/registros-saude',
+        },
+        {
+          icon: '💰',
+          title: 'Financeiro',
+          subtitle: 'Controle de gastos',
+          color: 'linear-gradient(135deg, #6BCF7F, #52B869)',
+          path: '/financeiro',
+        },
+        {
+          icon: '📦',
+          title: 'Estoque',
+          subtitle: 'Suprimentos e alertas de reposição',
+          color: 'linear-gradient(135deg, #FFD93D, #F5C518)',
+          path: '/estoque',
+        },
+        {
+          icon: '⭐',
+          title: 'Avaliações',
+          subtitle: 'Avalie veterinários e serviços',
+          color: 'linear-gradient(135deg, #FFB347, #FF9F1C)',
+          path: '/avaliacoes',
+        },
+        {
+          icon: '📊',
+          title: 'Relatórios',
+          subtitle: 'Saúde e gastos por período (PDF)',
+          color: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+          path: '/relatorios',
+        },
+      ]
+    : isVet
+      ? [
+          {
+            icon: '🐾',
+            title: 'Pets Compartilhados',
+            subtitle: 'Pets cujos tutores te concederam acesso',
+            color: 'linear-gradient(135deg, var(--secondary), var(--primary))',
+            path: '/pets-compartilhados',
+          },
+          {
+            icon: '💉',
+            title: 'Registros de Saúde',
+            subtitle: 'Histórico clínico dos pets compartilhados',
+            color: 'linear-gradient(135deg, #FFE66D, #F5D942)',
+            path: '/registros-saude',
+          },
+          {
+            icon: '⭐',
+            title: 'Avaliações',
+            subtitle: 'Veja avaliações de profissionais',
+            color: 'linear-gradient(135deg, #FFB347, #FF9F1C)',
+            path: '/avaliacoes',
+          },
+        ]
+      : [];
 
   return (
-    <div
-      style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '32px 16px',
-      }}
-    >
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 16px' }}>
       <div
         style={{
           marginBottom: '40px',
@@ -89,23 +146,11 @@ function Dashboard() {
         }}
       >
         <div>
-          <h1
-            style={{
-              fontFamily: 'var(--font-primary)',
-              fontSize: 'var(--text-3xl)',
-              marginBottom: '8px',
-            }}
-          >
+          <h1 style={{ fontFamily: 'var(--font-primary)', fontSize: 'var(--text-3xl)', marginBottom: '8px' }}>
             Olá, {user?.name}! 👋
           </h1>
-          <p
-            style={{
-              color: 'var(--text-secondary)',
-              fontSize: 'var(--text-base)',
-              margin: 0,
-            }}
-          >
-            Bem-vindo ao painel de {user?.type === 'Veterinário' ? 'veterinário' : 'tutor'}
+          <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-base)', margin: 0 }}>
+            Bem-vindo ao painel de {isVet ? 'veterinário' : 'tutor'}
           </p>
         </div>
         <div
@@ -120,7 +165,6 @@ function Dashboard() {
             gap: '8px',
           }}
         >
-          <span style={{ fontSize: '20px' }}>🎉</span>
           {user?.type}
         </div>
       </div>
@@ -130,12 +174,11 @@ function Dashboard() {
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
           gap: '24px',
-          marginBottom: '40px',
         }}
       >
-        {dashboardCards.map((card, idx) => (
+        {dashboardCards.map((card) => (
           <div
-            key={idx}
+            key={card.path}
             onClick={() => navigate(card.path)}
             style={{
               background: 'var(--surface)',
@@ -181,71 +224,9 @@ function Dashboard() {
             >
               {card.title}
             </h3>
-            <p
-              style={{
-                color: 'var(--text-secondary)',
-                fontSize: 'var(--text-sm)',
-                marginBottom: '12px',
-              }}
-            >
-              {card.subtitle}
-            </p>
-            <div
-              style={{
-                padding: '8px 12px',
-                background: 'var(--background)',
-                borderRadius: 'var(--radius-md)',
-                fontSize: 'var(--text-xs)',
-                color: 'var(--text-secondary)',
-                fontWeight: 'var(--font-medium)',
-                display: 'inline-block',
-              }}
-            >
-              {card.stats}
-            </div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 'var(--text-sm)', margin: 0 }}>{card.subtitle}</p>
           </div>
         ))}
-      </div>
-
-      <div
-        style={{
-          background: 'linear-gradient(135deg, var(--primary-light), var(--secondary-light))',
-          borderRadius: 'var(--radius-xl)',
-          padding: '32px',
-          textAlign: 'center',
-          boxShadow: 'var(--shadow-md)',
-        }}
-      >
-        <h2
-          style={{
-            fontFamily: 'var(--font-primary)',
-            fontSize: 'var(--text-2xl)',
-            marginBottom: '12px',
-            color: 'var(--primary-dark)',
-          }}
-        >
-          Comece cadastrando seu primeiro pet! 🐕
-        </h2>
-        <p
-          style={{
-            color: 'var(--text-secondary)',
-            fontSize: 'var(--text-base)',
-            marginBottom: '24px',
-            maxWidth: '600px',
-            margin: '0 auto 24px',
-          }}
-        >
-          Adicione informações sobre seu pet e mantenha tudo organizado em um só lugar.
-        </p>
-        <button
-          onClick={() => navigate('/pets')}
-          style={{
-            padding: '14px 32px',
-            fontSize: 'var(--text-lg)',
-          }}
-        >
-          Adicionar Meu Primeiro Pet
-        </button>
       </div>
     </div>
   );
@@ -257,56 +238,23 @@ export function RootRouter() {
       <BrowserRouter>
         <Navbar />
         <Routes>
-          <Route
-            path="/"
-            element={
-              <Protected>
-                <Dashboard />
-              </Protected>
-            }
-          />
+          <Route path="/" element={<Protected><Dashboard /></Protected>} />
           <Route path="/login" element={<LoginForm />} />
           <Route path="/register" element={<RegisterForm />} />
-          <Route
-            path="/pets"
-            element={
-              <TutorOnly>
-                <PetsPage />
-              </TutorOnly>
-            }
-          />
-          <Route
-            path="/agenda"
-            element={
-              <Protected>
-                <AgendaPage />
-              </Protected>
-            }
-          />
-          <Route
-            path="/registros-saude"
-            element={
-              <Protected>
-                <RegistroSaudePage />
-              </Protected>
-            }
-          />
-          <Route
-            path="/financeiro"
-            element={
-              <Protected>
-                <div style={{ padding: '32px', textAlign: 'center' }}>Em desenvolvimento...</div>
-              </Protected>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <AdminOnly>
-                <AdminUsersPage />
-              </AdminOnly>
-            }
-          />
+          <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
+          <Route path="/resetar-senha" element={<ResetarSenhaPage />} />
+          <Route path="/termos" element={<TermosPage />} />
+          <Route path="/pets" element={<TutorOnly><PetsPage /></TutorOnly>} />
+          <Route path="/agenda" element={<TutorOnly><AgendaPage /></TutorOnly>} />
+          <Route path="/registros-saude" element={<Protected><RegistroSaudePage /></Protected>} />
+          <Route path="/financeiro" element={<TutorOnly><FinanceiroPage /></TutorOnly>} />
+          <Route path="/estoque" element={<TutorOnly><SuprimentoPage /></TutorOnly>} />
+          <Route path="/avaliacoes" element={<Protected><AvaliacaoPage /></Protected>} />
+          <Route path="/relatorios" element={<TutorOnly><RelatoriosPage /></TutorOnly>} />
+          <Route path="/notificacoes" element={<Protected><NotificacoesPage /></Protected>} />
+          <Route path="/pets-compartilhados" element={<VetOnly><PetsCompartilhadosPage /></VetOnly>} />
+          <Route path="/perfil" element={<Protected><PerfilPage /></Protected>} />
+          <Route path="/admin/users" element={<AdminOnly><AdminUsersPage /></AdminOnly>} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>

@@ -23,6 +23,7 @@ export function RegisterForm() {
   const [clinicAddress, setClinicAddress] = useState('');
   const [professionalIdDoc, setProfessionalIdDoc] = useState<File | null>(null);
   const [diplomaDoc, setDiplomaDoc] = useState<File | null>(null);
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const isVet = type === 'Veterinário';
   const [loading, setLoading] = useState(false);
 
@@ -75,6 +76,11 @@ export function RegisterForm() {
       setLoading(false);
       return;
     }
+    if (!acceptTerms) {
+      showToast('❌ Você precisa aceitar os Termos de Uso e Política de Privacidade', 'error');
+      setLoading(false);
+      return;
+    }
     if (isVet) {
       if (!crmv.trim()) {
         showToast('❌ CRMV é obrigatório para veterinários', 'error');
@@ -108,6 +114,7 @@ export function RegisterForm() {
         if (professionalIdDoc) fd.append('professionalIdDoc', professionalIdDoc);
         if (diplomaDoc) fd.append('diplomaDoc', diplomaDoc);
       }
+      fd.append('acceptTerms', 'true');
 
       await register(fd);
       showToast('✅ Conta criada com sucesso! Bem-vindo!', 'success');
@@ -344,6 +351,31 @@ export function RegisterForm() {
                 </div>
               )}
             </div>
+
+            <label
+              style={{
+                display: 'flex',
+                gap: 8,
+                alignItems: 'flex-start',
+                marginTop: 16,
+                fontSize: 'var(--text-sm)',
+                cursor: 'pointer',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                style={{ marginTop: 4 }}
+              />
+              <span>
+                Li e concordo com os{' '}
+                <Link to="/termos" target="_blank" style={{ color: 'var(--primary)' }}>
+                  Termos de Uso e Política de Privacidade
+                </Link>{' '}
+                (LGPD)
+              </span>
+            </label>
 
             <button
               type="submit"

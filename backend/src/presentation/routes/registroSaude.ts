@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import { requireAuth } from '../middleware/auth';
 import { SqliteRegistroSaudeRepository } from '../../infrastructure/repositories/SqliteRegistroSaudeRepository';
 import { SqlitePetRepository } from '../../infrastructure/repositories/SqlitePetRepository';
+import { SqlitePetAccessRepository } from '../../infrastructure/repositories/SqlitePetAccessRepository';
 import { CreateRegistroSaude } from '../../application/registroSaude/CreateRegistroSaude';
 import { UpdateRegistroSaude } from '../../application/registroSaude/UpdateRegistroSaude';
 import { DeleteRegistroSaude } from '../../application/registroSaude/DeleteRegistroSaude';
@@ -38,31 +39,31 @@ const upload = multer({
 });
 
 export const registrosSaudeRouter = Router();
-registrosSaudeRouter.get('/', requireAuth, (req: any, res) => {
+registrosSaudeRouter.use(requireAuth);
+
+registrosSaudeRouter.get('/', (req: any, res) => {
   try {
     const registroRepo = new SqliteRegistroSaudeRepository();
-    const listRegistros = new ListRegistroSaude(registroRepo);
-
-    const registros = listRegistros.execute({ userId: req.user.id });
-
+    const list = new ListRegistroSaude(registroRepo);
+    const registros = list.execute({ userId: req.user.id, userType: req.user.type });
     res.json(registros);
   } catch (error: any) {
     res.status(400).json({ message: error.message || 'Erro ao buscar registros de saúde' });
   }
 });
 
-registrosSaudeRouter.post('/', requireAuth, upload.single('file'), (req: any, res) => {
+registrosSaudeRouter.post('/', upload.single('file'), (req: any, res) => {
   try {
     const registroRepo = new SqliteRegistroSaudeRepository();
     const petRepo = new SqlitePetRepository();
-    const createRegistro = new CreateRegistroSaude(registroRepo, petRepo);
+    const accessRepo = new SqlitePetAccessRepository();
+    const create = new CreateRegistroSaude(registroRepo, petRepo, accessRepo);
 
     const file = req.file;
     const body = req.body;
-
     const finalFilePath = file ? `/uploads/registros/${file.filename}` : null;
 
-    const input = {
+    const novoRegistro = create.execute({
       userId: req.user.id,
       userType: req.user.type,
       data: {
@@ -72,51 +73,40 @@ registrosSaudeRouter.post('/', requireAuth, upload.single('file'), (req: any, re
         horario: body.horario,
         profissional: body.profissional,
         filePath: finalFilePath,
+        fileData: null,
       },
-    };
-
-    const novoRegistro = createRegistro.execute(input as any);
+    } as any);
     res.status(201).json(novoRegistro);
   } catch (error: any) {
     if (req.file) fs.unlinkSync(req.file.path);
-
     if (error?.message?.includes('Apenas arquivos')) return res.status(400).json({ message: error.message });
     if (error?.errors) return res.status(400).json({ message: 'ValidationError', errors: error.errors });
     res.status(400).json({ message: error.message || 'Erro ao cadastrar registro de saúde' });
   }
 });
 
-registrosSaudeRouter.put('/:id', requireAuth, upload.single('file'), (req: any, res) => {
+registrosSaudeRouter.put('/:id', upload.single('file'), (req: any, res) => {
   try {
     const registroRepo = new SqliteRegistroSaudeRepository();
     const petRepo = new SqlitePetRepository();
-    const updateRegistro = new UpdateRegistroSaude(registroRepo, petRepo);
+    const accessRepo = new SqlitePetAccessRepository();
+    const update = new UpdateRegistroSaude(registroRepo, petRepo, accessRepo);
 
-    const registroId = Number(req.params.id);
     const file = req.file;
     const body = req.body;
+    const filePath = file ? `/uploads/registros/${file.filename}` : body.filePath || null;
 
-    let filePath: string | null = null;
-    if (file) {
-      filePath = `/uploads/registros/${file.filename}`;
-    } else if (body.filePath) {
-      filePath = body.filePath;
-    } else {
-      filePath = null;
-    }
-
-    const input = {
-      registroId,
+    const registroAtualizado = update.execute({
+      registroId: Number(req.params.id),
       userId: req.user.id,
+      userType: req.user.type,
       data: {
         data: body.data,
         horario: body.horario,
         profissional: body.profissional,
-        filePath: filePath,
+        filePath,
       },
-    };
-
-    const registroAtualizado = updateRegistro.execute(input as any);
+    } as any);
     res.json(registroAtualizado);
   } catch (error: any) {
     if (req.file) fs.unlinkSync(req.file.path);
@@ -125,20 +115,17 @@ registrosSaudeRouter.put('/:id', requireAuth, upload.single('file'), (req: any, 
   }
 });
 
-registrosSaudeRouter.delete('/:id', requireAuth, (req: any, res) => {
+registrosSaudeRouter.delete('/:id', (req: any, res) => {
   try {
     const registroRepo = new SqliteRegistroSaudeRepository();
     const petRepo = new SqlitePetRepository();
-    const deleteRegistro = new DeleteRegistroSaude(registroRepo, petRepo);
-
-    const registroId = Number(req.params.id);
-
-    deleteRegistro.execute({
-      registroId,
+    const accessRepo = new SqlitePetAccessRepository();
+    const del = new DeleteRegistroSaude(registroRepo, petRepo, accessRepo);
+    del.execute({
+      registroId: Number(req.params.id),
       userId: req.user.id,
       userType: req.user.type,
     });
-
     res.status(204).send();
   } catch (error: any) {
     res.status(403).json({ message: error.message || 'Ação não permitida para este registro.' });

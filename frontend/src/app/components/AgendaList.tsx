@@ -148,7 +148,7 @@ export function AgendaList({ onEdit, onRefresh, refreshKey }: AgendaListProps) {
                           onClick={() => onEdit(a)}
                           style={{ padding: '8px 16px', fontSize: 'var(--text-xs)' }}
                         >
-                          ✏️ Editar
+                          Editar
                         </button>
                         <button
                           data-testid={`agenda-delete-${a.id}`}
@@ -156,7 +156,7 @@ export function AgendaList({ onEdit, onRefresh, refreshKey }: AgendaListProps) {
                           onClick={() => onDelete(a.id)}
                           style={{ padding: '8px 16px', fontSize: 'var(--text-xs)' }}
                         >
-                          🗑️ Excluir
+                          Excluir
                         </button>
                       </div>
                     </td>

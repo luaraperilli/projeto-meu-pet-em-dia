@@ -306,7 +306,7 @@ export function AdminUserList({ onEdit, onRefresh }: { onEdit: (u: User) => void
                           minWidth: 'auto',
                         }}
                       >
-                        ✏️ Editar
+                        Editar
                       </button>
                       <button
                         data-testid={`admin-delete-${u.id}`}
@@ -318,7 +318,7 @@ export function AdminUserList({ onEdit, onRefresh }: { onEdit: (u: User) => void
                           minWidth: 'auto',
                         }}
                       >
-                        🗑️ Excluir
+                        Excluir
                       </button>
                     </div>
                   </td>

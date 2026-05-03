@@ -186,7 +186,7 @@ export function RegistroSaudeList({ onEdit, onRefresh, refreshKey }: RegistroSau
                           onClick={() => onEdit(r)}
                           style={{ padding: '8px 16px', fontSize: 'var(--text-xs)' }}
                         >
-                          ✏️ Editar
+                          Editar
                         </button>
                         <button
                           data-testid={`registro-delete-${r.id}`}
@@ -194,7 +194,7 @@ export function RegistroSaudeList({ onEdit, onRefresh, refreshKey }: RegistroSau
                           onClick={() => onDelete(r.id, r.tipoRegistro)}
                           style={{ padding: '8px 16px', fontSize: 'var(--text-xs)' }}
                         >
-                          🗑️ Excluir
+                          Excluir
                         </button>
                       </div>
                     </td>

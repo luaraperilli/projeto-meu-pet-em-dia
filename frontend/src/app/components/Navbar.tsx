@@ -1,25 +1,66 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@app/providers/AuthProvider';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { API_BASE_URL } from '@lib/api';
+
+const PUBLIC_ROUTES = ['/login', '/register', '/esqueci-senha', '/resetar-senha', '/termos'];
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
+  const [notifIds, setNotifIds] = useState<string[]>([]);
 
-  const publicRoutes = ['/login', '/register'];
-  const isPublicRoute = publicRoutes.includes(location.pathname);
+  const isPublicRoute = PUBLIC_ROUTES.includes(location.pathname);
+
+  useEffect(() => {
+    if (!user) return;
+    const carregar = () =>
+      fetch(`${API_BASE_URL}/notificacoes`, { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } })
+        .then((r) => (r.ok ? r.json() : []))
+        .then((d) => {
+          const all: { id: string }[] = Array.isArray(d) ? d : [];
+          const ids = all.map((n) => n.id);
+          setNotifIds(ids);
+          const seen = new Set<string>(JSON.parse(localStorage.getItem('notifSeen') || '[]'));
+          setNotifCount(ids.filter((id) => !seen.has(id)).length);
+        })
+        .catch(() => setNotifCount(0));
+    carregar();
+    const t = setInterval(carregar, 60_000);
+    return () => clearInterval(t);
+  }, [user]);
+
+  function abrirNotificacoes() {
+    localStorage.setItem('notifSeen', JSON.stringify(notifIds));
+    setNotifCount(0);
+    navigate('/notificacoes');
+  }
 
   if (!user || isPublicRoute) return null;
 
   const navLinks = [
     { path: '/', label: 'Dashboard', icon: '🏠' },
-    { path: '/pets', label: 'Meus Pets', icon: '🐾' },
-    { path: '/agenda', label: 'Agenda', icon: '📅' },
-    { path: '/registros-saude', label: 'Saúde', icon: '💉' },
-    { path: '/financeiro', label: 'Financeiro', icon: '💰' },
-    ...(user.role === 'admin' ? [{ path: '/admin/users', label: 'Gerenciar usuários', icon: '🧑‍💼' }] : []),
+    ...(user.type === 'Tutor'
+      ? [
+          { path: '/pets', label: 'Pets', icon: '🐾' },
+          { path: '/agenda', label: 'Agenda', icon: '📅' },
+          { path: '/registros-saude', label: 'Saúde', icon: '💉' },
+          { path: '/financeiro', label: 'Financeiro', icon: '💰' },
+          { path: '/estoque', label: 'Estoque', icon: '📦' },
+          { path: '/relatorios', label: 'Relatórios', icon: '📊' },
+        ]
+      : []),
+    ...(user.type === 'Veterinário'
+      ? [
+          { path: '/pets-compartilhados', label: 'Pets', icon: '🐾' },
+          { path: '/registros-saude', label: 'Saúde', icon: '💉' },
+        ]
+      : []),
+    { path: '/avaliacoes', label: 'Avaliações', icon: '⭐' },
+    ...(user.role === 'admin' ? [{ path: '/admin/users', label: 'Usuários', icon: '🧑‍💼' }] : []),
   ];
 
   return (
@@ -52,7 +93,6 @@ export function Navbar() {
             textDecoration: 'none',
           }}
         >
-          <span style={{ fontSize: '28px' }}>🐾</span>
           Meu Pet em Dia
         </Link>
 
@@ -93,39 +133,51 @@ export function Navbar() {
           ))}
         </div>
 
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <button
+            onClick={abrirNotificacoes}
+            title="Notificações"
             style={{
               background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              fontSize: '24px',
-              padding: '8px',
+              fontSize: 24,
+              padding: 8,
               position: 'relative',
               boxShadow: 'none',
             }}
           >
             🔔
-            <span
-              style={{
-                position: 'absolute',
-                top: '4px',
-                right: '4px',
-                width: '10px',
-                height: '10px',
-                background: 'var(--error)',
-                borderRadius: 'var(--radius-full)',
-                border: '2px solid var(--surface)',
-              }}
-            />
+            {notifCount > 0 && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: 2,
+                  right: 2,
+                  minWidth: 18,
+                  height: 18,
+                  padding: '0 4px',
+                  background: 'var(--error)',
+                  color: 'white',
+                  borderRadius: 9,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {notifCount}
+              </span>
+            )}
           </button>
 
           <div style={{ position: 'relative' }}>
             <div
               onClick={() => setShowDropdown(!showDropdown)}
               style={{
-                width: '40px',
-                height: '40px',
+                width: 40,
+                height: 40,
                 borderRadius: 'var(--radius-full)',
                 background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
                 display: 'flex',
@@ -134,11 +186,8 @@ export function Navbar() {
                 color: 'var(--surface)',
                 fontWeight: 'var(--font-bold)',
                 cursor: 'pointer',
-                transition: 'transform 0.3s ease',
                 border: '2px solid var(--primary-light)',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-              onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
             >
               {user.name.charAt(0).toUpperCase()}
             </div>
@@ -149,11 +198,11 @@ export function Navbar() {
                   position: 'absolute',
                   top: 'calc(100% + 8px)',
                   right: 0,
-                  minWidth: '220px',
+                  minWidth: 220,
                   background: 'var(--surface)',
                   borderRadius: 'var(--radius-lg)',
                   boxShadow: 'var(--shadow-xl)',
-                  padding: '8px',
+                  padding: 8,
                   zIndex: 1001,
                 }}
               >
@@ -162,36 +211,23 @@ export function Navbar() {
                   <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>{user.type}</div>
                 </div>
                 <div
+                  onClick={() => {
+                    setShowDropdown(false);
+                    navigate('/perfil');
+                  }}
                   style={{
                     padding: '12px 16px',
                     borderRadius: 'var(--radius-md)',
                     cursor: 'pointer',
-                    transition: 'background 0.2s ease',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
+                    gap: 12,
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--background)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                 >
                   <span>👤</span>
                   Meu Perfil
-                </div>
-                <div
-                  style={{
-                    padding: '12px 16px',
-                    borderRadius: 'var(--radius-md)',
-                    cursor: 'pointer',
-                    transition: 'background 0.2s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--background)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                >
-                  <span>⚙️</span>
-                  Configurações
                 </div>
                 <hr style={{ margin: '8px 0' }} />
                 <div
@@ -200,10 +236,9 @@ export function Navbar() {
                     padding: '12px 16px',
                     borderRadius: 'var(--radius-md)',
                     cursor: 'pointer',
-                    transition: 'background 0.2s ease',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
+                    gap: 12,
                     color: 'var(--error)',
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255, 107, 107, 0.1)')}
@@ -242,12 +277,12 @@ export function Navbar() {
             fontWeight: 'var(--font-semibold)',
           }}
         >
-          <span style={{ fontSize: 22 }}>🐾</span>
           <span style={{ fontSize: 'var(--text-base)' }}>Meu Pet em Dia</span>
         </div>
 
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center', position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, position: 'relative' }}>
           <button
+            onClick={abrirNotificacoes}
             style={{
               background: 'transparent',
               border: 'none',
@@ -259,88 +294,100 @@ export function Navbar() {
             }}
           >
             🔔
-            <span
-              style={{
-                position: 'absolute',
-                top: 2,
-                right: 2,
-                width: 8,
-                height: 8,
-                background: 'var(--error)',
-                borderRadius: 'var(--radius-full)',
-                border: '2px solid var(--surface)',
-              }}
-            />
-          </button>
-
-          <div style={{ position: 'relative' }}>
-            <div
-              onClick={() => setShowDropdown(!showDropdown)}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 'var(--radius-full)',
-                background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--surface)',
-                fontWeight: 'var(--font-bold)',
-                cursor: 'pointer',
-                border: '2px solid var(--primary-light)',
-              }}
-            >
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-
-            {showDropdown && (
-              <div
+            {notifCount > 0 && (
+              <span
                 style={{
                   position: 'absolute',
-                  top: 'calc(100% + 8px)',
+                  top: 0,
                   right: 0,
-                  minWidth: 220,
-                  background: 'var(--surface)',
-                  borderRadius: 'var(--radius-lg)',
-                  boxShadow: 'var(--shadow-xl)',
-                  padding: 8,
-                  zIndex: 1002,
+                  minWidth: 16,
+                  height: 16,
+                  padding: '0 3px',
+                  background: 'var(--error)',
+                  color: 'white',
+                  borderRadius: 8,
+                  fontSize: 10,
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
-                  <div style={{ fontWeight: 'var(--font-semibold)', color: 'var(--text-primary)' }}>{user.name}</div>
-                  <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>{user.type}</div>
-                </div>
-                <div
-                  style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
-                >
-                  <span>👤</span>
-                  Meu Perfil
-                </div>
-                <div
-                  style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
-                >
-                  <span>⚙️</span>
-                  Configurações
-                </div>
-                <hr style={{ margin: '8px 0' }} />
-                <div
-                  onClick={logout}
-                  style={{
-                    padding: '12px 16px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 12,
-                    color: 'var(--error)',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <span>🚪</span>
-                  Sair
-                </div>
-              </div>
+                {notifCount}
+              </span>
             )}
+          </button>
+
+          <div
+            onClick={() => setShowDropdown(!showDropdown)}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 'var(--radius-full)',
+              background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--surface)',
+              fontWeight: 'var(--font-bold)',
+              cursor: 'pointer',
+              border: '2px solid var(--primary-light)',
+            }}
+          >
+            {user.name.charAt(0).toUpperCase()}
           </div>
+
+          {showDropdown && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 'calc(100% + 8px)',
+                right: 0,
+                minWidth: 220,
+                background: 'var(--surface)',
+                borderRadius: 'var(--radius-lg)',
+                boxShadow: 'var(--shadow-xl)',
+                padding: 8,
+                zIndex: 1002,
+              }}
+            >
+              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
+                <div style={{ fontWeight: 'var(--font-semibold)', color: 'var(--text-primary)' }}>{user.name}</div>
+                <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-secondary)' }}>{user.type}</div>
+              </div>
+              <div
+                onClick={() => {
+                  setShowDropdown(false);
+                  navigate('/perfil');
+                }}
+                style={{
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  cursor: 'pointer',
+                }}
+              >
+                <span>👤</span>
+                Meu Perfil
+              </div>
+              <hr style={{ margin: '8px 0' }} />
+              <div
+                onClick={logout}
+                style={{
+                  padding: '12px 16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  color: 'var(--error)',
+                  cursor: 'pointer',
+                }}
+              >
+                <span>🚪</span>
+                Sair
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -360,117 +407,35 @@ export function Navbar() {
         }}
         className="bottom-nav"
       >
-        {user.role === 'admin' ? (
-          navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
+        {navLinks.map((link) => (
+          <Link
+            key={link.path}
+            to={link.path}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              color: location.pathname === link.path ? 'var(--primary)' : 'var(--text-secondary)',
+              fontSize: 'var(--text-xs)',
+              textDecoration: 'none',
+              transition: 'all 0.3s ease',
+              padding: '8px 10px',
+              minWidth: 60,
+            }}
+          >
+            <span
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '4px',
-                color: location.pathname === link.path ? 'var(--primary)' : 'var(--text-secondary)',
-                fontSize: 'var(--text-xs)',
-                textDecoration: 'none',
-                transition: 'all 0.3s ease',
-                padding: '8px 10px',
-                minWidth: 60,
+                fontSize: '22px',
+                transition: 'transform 0.3s ease',
+                transform: location.pathname === link.path ? 'translateY(-2px)' : 'none',
               }}
             >
-              <span
-                style={{
-                  fontSize: '22px',
-                  transition: 'transform 0.3s ease',
-                  transform: location.pathname === link.path ? 'translateY(-2px)' : 'none',
-                }}
-              >
-                {link.icon}
-              </span>
-              <span style={{ whiteSpace: 'nowrap' }}>{link.label}</span>
-            </Link>
-          ))
-        ) : (
-          <>
-            {navLinks.slice(0, 2).map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '4px',
-                  color: location.pathname === link.path ? 'var(--primary)' : 'var(--text-secondary)',
-                  fontSize: 'var(--text-xs)',
-                  textDecoration: 'none',
-                  transition: 'all 0.3s ease',
-                  padding: '8px 16px',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '24px',
-                    transition: 'transform 0.3s ease',
-                    transform: location.pathname === link.path ? 'translateY(-2px)' : 'none',
-                  }}
-                >
-                  {link.icon}
-                </span>
-                {link.label}
-              </Link>
-            ))}
-
-            <div style={{ position: 'relative', top: '-20px' }}>
-              <div
-                style={{
-                  width: '56px',
-                  height: '56px',
-                  borderRadius: 'var(--radius-full)',
-                  background: 'linear-gradient(135deg, var(--primary), var(--secondary))',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: 'var(--shadow-lg)',
-                  color: 'var(--surface)',
-                  fontSize: '28px',
-                  cursor: 'pointer',
-                }}
-              >
-                ➕
-              </div>
-            </div>
-
-            {navLinks.slice(2).map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '4px',
-                  color: location.pathname === link.path ? 'var(--primary)' : 'var(--text-secondary)',
-                  fontSize: 'var(--text-xs)',
-                  textDecoration: 'none',
-                  transition: 'all 0.3s ease',
-                  padding: '8px 16px',
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: '24px',
-                    transition: 'transform 0.3s ease',
-                    transform: location.pathname === link.path ? 'translateY(-2px)' : 'none',
-                  }}
-                >
-                  {link.icon}
-                </span>
-                {link.label}
-              </Link>
-            ))}
-          </>
-        )}
+              {link.icon}
+            </span>
+            <span style={{ whiteSpace: 'nowrap' }}>{link.label}</span>
+          </Link>
+        ))}
       </nav>
 
       <style>{`

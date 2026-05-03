@@ -76,4 +76,72 @@ db.exec(`
   );
   CREATE INDEX IF NOT EXISTS idx_registros_pet ON registros_saude(petId);
   CREATE INDEX IF NOT EXISTS idx_registros_data ON registros_saude(data DESC, horario DESC);
+
+  CREATE TABLE IF NOT EXISTS financeiro (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    petId INTEGER NOT NULL,
+    userId INTEGER NOT NULL,
+    categoria TEXT NOT NULL CHECK (categoria IN ('Consulta','Vacina','Medicamento','Exame','Suprimento','Outros')),
+    data TEXT NOT NULL,
+    valor REAL NOT NULL,
+    observacoes TEXT,
+    createdAt TEXT NOT NULL DEFAULT (DATETIME('now')),
+    FOREIGN KEY(petId) REFERENCES pets(id) ON DELETE CASCADE,
+    FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_financeiro_user ON financeiro(userId);
+  CREATE INDEX IF NOT EXISTS idx_financeiro_data ON financeiro(data DESC);
+
+  CREATE TABLE IF NOT EXISTS suprimentos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER NOT NULL,
+    petId INTEGER,
+    nome TEXT NOT NULL,
+    categoria TEXT NOT NULL CHECK (categoria IN ('Ração','Medicamento','Higiene','Acessório','Outros')),
+    quantidade REAL NOT NULL,
+    unidade TEXT NOT NULL,
+    consumoDiario REAL,
+    diasAlerta INTEGER NOT NULL DEFAULT 7,
+    createdAt TEXT NOT NULL DEFAULT (DATETIME('now')),
+    updatedAt TEXT NOT NULL DEFAULT (DATETIME('now')),
+    FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY(petId) REFERENCES pets(id) ON DELETE SET NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_suprimentos_user ON suprimentos(userId);
+
+  CREATE TABLE IF NOT EXISTS avaliacoes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER NOT NULL,
+    profissional TEXT NOT NULL,
+    servico TEXT NOT NULL,
+    nota INTEGER NOT NULL CHECK (nota BETWEEN 1 AND 5),
+    comentario TEXT,
+    data TEXT NOT NULL DEFAULT (DATE('now')),
+    createdAt TEXT NOT NULL DEFAULT (DATETIME('now')),
+    FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_avaliacoes_profissional ON avaliacoes(profissional);
+
+  CREATE TABLE IF NOT EXISTS pet_access (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    petId INTEGER NOT NULL,
+    vetUserId INTEGER NOT NULL,
+    grantedAt TEXT NOT NULL DEFAULT (DATETIME('now')),
+    UNIQUE(petId, vetUserId),
+    FOREIGN KEY(petId) REFERENCES pets(id) ON DELETE CASCADE,
+    FOREIGN KEY(vetUserId) REFERENCES users(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_pet_access_vet ON pet_access(vetUserId);
+
+  CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER NOT NULL,
+    token TEXT NOT NULL UNIQUE,
+    expiresAt TEXT NOT NULL,
+    usedAt TEXT,
+    createdAt TEXT NOT NULL DEFAULT (DATETIME('now')),
+    FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_reset_token ON password_reset_tokens(token);
 `);
+
