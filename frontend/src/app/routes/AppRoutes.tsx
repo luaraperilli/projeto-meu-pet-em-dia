@@ -10,7 +10,6 @@ import { NotificacoesPage } from '@app/components/NotificacoesPage';
 import { PerfilPage } from '@app/components/PerfilPage';
 import { EsqueciSenhaPage } from '@app/components/EsqueciSenhaPage';
 import { ResetarSenhaPage } from '@app/components/ResetarSenhaPage';
-import { TermosPage } from '@app/components/TermosPage';
 
 function Protected({ children }: { children: JSX.Element }) {
   const { user } = useAuth();
@@ -168,7 +167,6 @@ export function RootRouter() {
           <Route path="/register" element={<RegisterForm />} />
           <Route path="/esqueci-senha" element={<EsqueciSenhaPage />} />
           <Route path="/resetar-senha" element={<ResetarSenhaPage />} />
-          <Route path="/termos" element={<TermosPage />} />
           <Route path="/pets" element={<TutorOnly><PetsPage /></TutorOnly>} />
           <Route path="/agenda" element={<TutorOnly><AgendaPage /></TutorOnly>} />
           <Route path="/registros-saude" element={<TutorOnly><RegistroSaudePage /></TutorOnly>} />

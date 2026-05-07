@@ -46,10 +46,6 @@ authRouter.post(
   ]),
   (req, res) => {
     try {
-      if (req.body.acceptTerms !== 'true' && req.body.acceptTerms !== true) {
-        return res.status(400).json({ message: 'Você precisa aceitar os Termos de Uso e Política de Privacidade (LGPD)' });
-      }
-
       const repo = new SqliteUserRepository();
       const usecase = new CreateUser(repo);
       const files = req.files as Record<string, Express.Multer.File[]> | undefined;
@@ -145,18 +141,6 @@ authRouter.put(
     }
   },
 );
-
-authRouter.delete('/me', requireAuth, (req: any, res) => {
-  try {
-    const repo = new SqliteUserRepository();
-    const u = repo.findById(req.user.id);
-    if (!u) return res.status(404).json({ message: 'NotFound' });
-    repo.delete(req.user.id);
-    res.status(204).send();
-  } catch {
-    res.status(500).json({ message: 'InternalError' });
-  }
-});
 
 authRouter.post('/forgot-password', (req, res) => {
   try {

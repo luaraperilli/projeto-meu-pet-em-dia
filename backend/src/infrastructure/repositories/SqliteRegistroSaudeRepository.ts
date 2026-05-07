@@ -5,7 +5,7 @@ import { RegistroSaudeRepository } from './RegistroSaudeRepository';
 export class SqliteRegistroSaudeRepository implements RegistroSaudeRepository {
   create(data: RegistroSaudeInputDTO & { userId: number }): RegistroSaude {
     const stmt = db.prepare(
-      `INSERT INTO registros_saude (petId, userId, tipoRegistro, data, horario, profissional, filePath) VALUES (@petId, @userId, @tipoRegistro, @data, @horario, @profissional, @filePath)`,
+      `INSERT INTO registros_saude (petId, userId, tipoRegistro, data, horario, profissional) VALUES (@petId, @userId, @tipoRegistro, @data, @horario, @profissional)`,
     );
     const info = stmt.run({
       petId: data.petId,
@@ -14,7 +14,6 @@ export class SqliteRegistroSaudeRepository implements RegistroSaudeRepository {
       data: data.data,
       horario: data.horario,
       profissional: data.profissional!,
-      filePath: data.filePath || null,
     });
     return db
       .prepare('SELECT * FROM registros_saude WHERE id = ?')
@@ -27,18 +26,16 @@ export class SqliteRegistroSaudeRepository implements RegistroSaudeRepository {
 
     const trimmedProfissional = data.profissional?.trim();
     const profissional = trimmedProfissional || current.profissional;
-    const filePath = data.filePath === undefined ? current.filePath : data.filePath || null;
 
     db.prepare(
       `
       UPDATE registros_saude SET
         data = ?,
         horario = ?,
-        profissional = ?,
-        filePath = ?
+        profissional = ?
       WHERE id = ?
     `,
-    ).run(data.data ?? current.data, data.horario ?? current.horario, profissional, filePath, id);
+    ).run(data.data ?? current.data, data.horario ?? current.horario, profissional, id);
 
     return this.findById(id)!;
   }

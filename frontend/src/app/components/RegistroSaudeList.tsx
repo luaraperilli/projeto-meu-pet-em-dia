@@ -146,7 +146,6 @@ export function RegistroSaudeList({ onEdit, onRefresh, refreshKey }: RegistroSau
                   <th style={{ padding: 12, textAlign: 'left' }}>Tipo</th>
                   <th style={{ padding: 12, textAlign: 'left' }}>Data/Hora</th>
                   <th style={{ padding: 12, textAlign: 'left' }}>Profissional</th>
-                  <th style={{ padding: 12, textAlign: 'left' }}>Arquivo</th>
                   <th style={{ padding: 12, textAlign: 'center', width: 140 }}>Ações</th>
                 </tr>
               </thead>
@@ -165,20 +164,6 @@ export function RegistroSaudeList({ onEdit, onRefresh, refreshKey }: RegistroSau
                       {r.data} às {r.horario}
                     </td>
                     <td style={{ padding: 12 }}>{r.profissional}</td>
-                    <td style={{ padding: 12 }}>
-                      {r.filePath ? (
-                        <a
-                          href={`${API_BASE_URL}${r.filePath}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ color: 'var(--primary)', textDecoration: 'underline' }}
-                        >
-                          Visualizar Anexo
-                        </a>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
                     <td style={{ padding: 12, textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
                         <button

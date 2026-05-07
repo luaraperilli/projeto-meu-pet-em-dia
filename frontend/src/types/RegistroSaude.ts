@@ -10,15 +10,13 @@ export interface RegistroSaude {
   data: string;
   horario: string;
   profissional: string;
-  filePath: string | null;
   createdAt: string;
 }
 
 export type RegistroSaudeInputDTO = Omit<RegistroSaude, 'id' | 'createdAt' | 'userId'>;
 
-export type RegistroSaudeFormFields = Omit<RegistroSaudeInputDTO, 'filePath'> & {
+export type RegistroSaudeFormFields = RegistroSaudeInputDTO & {
   petId: string;
-  file: File | null;
 };
 
 export type RegistroSaudeItem = RegistroSaude & {

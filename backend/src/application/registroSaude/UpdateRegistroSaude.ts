@@ -5,7 +5,7 @@ import { PetRepository } from '../../infrastructure/repositories/PetRepository';
 export type UpdateRegistroSaudeInput = {
   registroId: number;
   userId: number;
-  data: Partial<Omit<RegistroSaudeInputDTO, 'petId' | 'tipoRegistro' | 'data' | 'horario'>>;
+  data: Partial<Omit<RegistroSaudeInputDTO, 'petId' | 'tipoRegistro'>>;
 };
 
 export class UpdateRegistroSaude {

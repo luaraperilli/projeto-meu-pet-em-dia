@@ -69,7 +69,6 @@ db.exec(`
     data TEXT NOT NULL,
     horario TEXT NOT NULL,
     profissional TEXT NOT NULL,
-    filePath TEXT,
     createdAt TEXT NOT NULL DEFAULT (DATETIME('now')),
     FOREIGN KEY(petId) REFERENCES pets(id) ON DELETE CASCADE,
     FOREIGN KEY(userId) REFERENCES users(id) ON DELETE CASCADE

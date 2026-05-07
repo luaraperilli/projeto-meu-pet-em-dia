@@ -6,9 +6,8 @@ const TIPOS_VALIDOS: readonly string[] = ['Vacina', 'Cirurgia', 'Exame', 'Observ
 
 export type CreateRegistroSaudeInput = {
   userId: number;
-  data: Omit<RegistroSaudeInputDTO, 'filePath' | 'userId'> & {
+  data: Omit<RegistroSaudeInputDTO, 'userId'> & {
     petId: number;
-    fileData: { buffer: Buffer; mimeType: string; originalName: string } | null;
   };
 };
 
@@ -38,23 +37,10 @@ export class CreateRegistroSaude {
     if (!data.tipoRegistro || !TIPOS_VALIDOS.includes(data.tipoRegistro))
       errors.tipoRegistro = 'Tipo de registro inválido';
 
-    if (data.fileData) {
-      const mimeType = data.fileData.mimeType;
-      if (!['application/pdf', 'image/png', 'image/jpeg'].includes(mimeType)) {
-        errors.arquivo = 'Tipo de arquivo inválido. Apenas PDF, PNG e JPG são permitidos.';
-      }
-    }
-
     if (Object.keys(errors).length) {
       const err = new Error('ValidationError') as Error & { errors?: Record<string, string> };
       err.errors = errors;
       throw err;
-    }
-
-    let filePath: string | null = null;
-    if (data.fileData) {
-      const fileExt = data.fileData.originalName.split('.').pop();
-      filePath = `/uploads/registros/${data.petId}_${Date.now()}.${fileExt}`;
     }
 
     const cleanedData: RegistroSaudeInputDTO & { userId: number } = {
@@ -64,7 +50,6 @@ export class CreateRegistroSaude {
       data: data.data.trim(),
       horario: data.horario.trim(),
       profissional: profissionalLimpo,
-      filePath,
     };
 
     return this.registroRepo.create(cleanedData);

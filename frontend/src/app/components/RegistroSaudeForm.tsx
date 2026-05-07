@@ -10,8 +10,6 @@ type FormState = {
   data: string;
   horario: string;
   profissional: string;
-  file: File | null;
-  filePath?: string;
 };
 
 interface RegistroSaudeFormProps {
@@ -28,8 +26,6 @@ export function RegistroSaudeForm({ registro, onSuccess, onCancel }: RegistroSau
     data: '',
     horario: '',
     profissional: '',
-    file: null,
-    filePath: registro?.filePath || undefined,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -55,27 +51,22 @@ export function RegistroSaudeForm({ registro, onSuccess, onCancel }: RegistroSau
     setErrors({});
 
     try {
-      const fd = new FormData();
-      fd.append('petId', form.petId.toString());
-      fd.append('tipoRegistro', form.tipoRegistro);
-      fd.append('data', form.data);
-      fd.append('horario', form.horario);
-      fd.append('profissional', form.profissional.trim());
-
-      if (registro?.filePath && !form.file) {
-        fd.append('filePath', registro.filePath);
-      } else if (form.filePath) {
-        fd.append('filePath', form.filePath);
-      } else {
-        fd.append('filePath', '');
-      }
-
-      if (form.file) fd.append('file', form.file);
+      const payload = {
+        petId: Number(form.petId),
+        tipoRegistro: form.tipoRegistro,
+        data: form.data,
+        horario: form.horario,
+        profissional: form.profissional.trim(),
+      };
 
       const url = registro ? `${API_BASE_URL}/registros_saude/${registro.id}` : `${API_BASE_URL}/registros_saude`;
       const method = registro ? 'PUT' : 'POST';
       const token = localStorage.getItem('token');
-      const res = await fetch(url, { method, headers: { Authorization: `Bearer ${token}` }, body: fd });
+      const res = await fetch(url, {
+        method,
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
       const ok = registro ? res.ok : res.status === 201;
       const data = await res.json().catch(() => ({}));
 
@@ -83,7 +74,7 @@ export function RegistroSaudeForm({ registro, onSuccess, onCancel }: RegistroSau
         showToast(registro ? 'Registro atualizado com sucesso!' : 'Registro cadastrado com sucesso!', 'success');
         onSuccess();
         if (!registro) {
-          setForm({ petId: '', tipoRegistro: 'Observação', data: '', horario: '', profissional: '', file: null });
+          setForm({ petId: '', tipoRegistro: 'Observação', data: '', horario: '', profissional: '' });
         }
         return;
       }
@@ -122,8 +113,6 @@ export function RegistroSaudeForm({ registro, onSuccess, onCancel }: RegistroSau
         data: registro.data,
         horario: registro.horario,
         profissional: registro.profissional,
-        file: null,
-        filePath: registro.filePath || undefined,
       });
     }
   }, [registro, loadingPets]);
@@ -218,24 +207,6 @@ export function RegistroSaudeForm({ registro, onSuccess, onCancel }: RegistroSau
             placeholder="Nome do Profissional Responsável"
           />
           {errors.profissional && <small style={{ color: 'var(--error)' }}>{errors.profissional}</small>}
-        </div>
-
-        <div>
-          <label>Arquivo (PDF/PNG/JPG)</label>
-          <input
-            type="file"
-            accept=".pdf,image/png,image/jpeg"
-            onChange={(e) => onChange('file', e.target.files?.[0] ?? null)}
-          />
-          {errors.file && <small style={{ color: 'var(--error)' }}>{errors.file}</small>}
-          {form.filePath && !form.file && (
-            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-secondary)', marginTop: 4 }}>
-              Anexo atual:{' '}
-              <a href={`${API_BASE_URL}${form.filePath}`} target="_blank" rel="noopener noreferrer">
-                Visualizar
-              </a>
-            </p>
-          )}
         </div>
       </div>
 

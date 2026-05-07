@@ -16,23 +16,22 @@ Sistema fullstack de gestão de saúde para pets — **branch da Entrega 1** do 
 
 **Sprint 2 — Perfil & Pets** (RF1.5-1.6, RF2.1-2.4, RNF1.2, RNF3.2)
 
-- Edição do próprio perfil + exclusão de conta (LGPD)
+- Edição do próprio perfil
 - Recuperação de senha por email (token de 1h, mockado em dev)
 - CRUD completo de pets com foto
 - UI responsiva
-- Termos de Uso / Política de Privacidade no cadastro
 
 **Sprint 3 — Agenda & Histórico** (RF3.1-3.3, RF4.1, RF4.4, RNF2.1, RNF3.1)
 
 - Agendamento de consultas, vacinas, banhos, vermífugos
 - Edição/cancelamento de agendamentos
 - Notificações in-app de compromissos próximos (sininho com badge)
-- Registros de saúde (vacinas, cirurgias, exames, observações) com upload de PDF/PNG/JPG
+- Registros de saúde (vacinas, cirurgias, exames, observações)
 - Consulta do histórico completo do pet
 
 ## Funcionalidades adiadas para Sprints 4-6 (branch `main`)
 
-Compartilhamento vet-tutor (RF4.2), Financeiro (RF5), Estoque (RF6), Relatórios PDF (RF7), Avaliações (RF8), Painel administrativo (RF9), LGPD avançado, testes E2E completos, revisões finais.
+Upload de exames PDF/PNG/JPG (RF4.3), Compartilhamento vet-tutor (RF4.2), Financeiro (RF5), Estoque (RF6), Relatórios PDF (RF7), Avaliações (RF8), Painel administrativo (RF9), LGPD (Termos + exclusão de conta — RNF6.1), testes E2E completos, revisões finais.
 
 ## Stack
 
@@ -104,10 +103,10 @@ Rotas autenticadas exigem `Authorization: Bearer <token>`.
 
 | Recurso | Métodos |
 |---|---|
-| `/auth` | `POST /register`, `POST /login`, `GET/PUT/DELETE /me`, `POST /forgot-password`, `POST /reset-password` |
+| `/auth` | `POST /register`, `POST /login`, `GET /me`, `PUT /me`, `POST /forgot-password`, `POST /reset-password` |
 | `/pets` | `GET`, `POST` (multipart com foto), `PUT /:id`, `DELETE /:id` |
 | `/agenda` | `GET`, `GET /pet/:petId`, `POST`, `PUT /:id`, `DELETE /:id` |
-| `/registros_saude` | `GET`, `POST` (multipart com PDF/PNG/JPG), `PUT /:id`, `DELETE /:id` |
+| `/registros_saude` | `GET`, `POST`, `PUT /:id`, `DELETE /:id` |
 | `/notificacoes` | `GET` (compromissos próximos) |
 | `/health` | `GET` |
 
@@ -124,7 +123,6 @@ Tabelas: `users`, `pets`, `agenda`, `registros_saude`, `password_reset_tokens`. 
 - **CPF**: 11 dígitos, formato `000.000.000-00`
 - **Celular**: `(00) 00000-0000`
 - **Senha**: 8–12 chars, ≥1 maiúscula, ≥1 número, ≥1 caractere especial (RNF1.3)
-- **Anexo de registro de saúde**: PDF/PNG/JPG, máx 5MB (RF4.3 — *avançado vem na Sprint 4*)
 - **Foto de pet**: PNG/JPG/WEBP/GIF, máx 5MB
 
 ## 🔐 Segurança

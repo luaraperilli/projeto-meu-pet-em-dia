@@ -102,7 +102,6 @@ function seedTutorData(tutor: User) {
     data: isoDateOffset(-180),
     horario: '09:00',
     profissional: 'Dr. José da Silva',
-    filePath: null,
   });
   registroRepo.create({
     petId: mel.id!,
@@ -111,7 +110,6 @@ function seedTutorData(tutor: User) {
     data: isoDateOffset(-90),
     horario: '08:00',
     profissional: 'Dra. Patrícia Souza',
-    filePath: null,
   });
   registroRepo.create({
     petId: frederico.id!,
@@ -120,7 +118,6 @@ function seedTutorData(tutor: User) {
     data: isoDateOffset(-30),
     horario: '11:00',
     profissional: 'Dra. Mariana Oliveira',
-    filePath: null,
   });
   registroRepo.create({
     petId: frederico.id!,
@@ -129,7 +126,6 @@ function seedTutorData(tutor: User) {
     data: isoDateOffset(-15),
     horario: '20:00',
     profissional: 'Tutor de Teste',
-    filePath: null,
   });
   console.log('  registros de saúde: 4');
 }

@@ -89,8 +89,4 @@ export class SqliteUserRepository implements UserRepository {
     );
     return this.findById(id)!;
   }
-
-  delete(id: number): void {
-    db.prepare('DELETE FROM users WHERE id = ?').run(id);
-  }
 }
