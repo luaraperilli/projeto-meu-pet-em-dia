@@ -2,9 +2,9 @@
 
 :root {
   /* Cores Principais */
-  --primary: #ff6b9d;
-  --primary-light: #ffb5d0;
-  --primary-dark: #e8538a;
+  --primary: #ffa070;
+  --primary-light: #ffd9bc;
+  --primary-dark: #ff8855;
 
   /* Cores Secundárias */
   --secondary: #4ecdc4;
@@ -125,7 +125,7 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.1);
+  box-shadow: 0 0 0 3px rgba(255, 160, 112, 0.15);
   outline: none;
 }
 

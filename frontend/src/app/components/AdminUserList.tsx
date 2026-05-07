@@ -284,7 +284,7 @@ export function AdminUserList({ onEdit, onRefresh }: { onEdit: (u: User) => void
                       style={{
                         padding: '4px 12px',
                         borderRadius: 'var(--radius-full)',
-                        background: u.type === 'Veterinário' ? 'rgba(78, 205, 196, 0.1)' : 'rgba(255, 107, 157, 0.1)',
+                        background: u.type === 'Veterinário' ? 'rgba(78, 205, 196, 0.1)' : 'rgba(255, 160, 112, 0.15)',
                         color: u.type === 'Veterinário' ? 'var(--secondary-dark)' : 'var(--primary-dark)',
                         fontSize: 'var(--text-xs)',
                         fontWeight: 'var(--font-medium)',

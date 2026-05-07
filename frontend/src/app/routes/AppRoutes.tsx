@@ -61,7 +61,7 @@ function Dashboard() {
           icon: '🐾',
           title: 'Meus Pets',
           subtitle: 'Cadastre e gerencie seus pets',
-          color: 'linear-gradient(135deg, #FF6B9D, #E8538A)',
+          color: 'linear-gradient(135deg, #FFA070, #FF8855)',
           path: '/pets',
         },
         {

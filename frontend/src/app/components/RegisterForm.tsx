@@ -200,8 +200,8 @@ export function RegisterForm() {
                     textAlign: 'center',
                     cursor: 'pointer',
                     transition: 'all 0.3s ease',
-                    background: type === t ? 'rgba(255, 107, 157, 0.05)' : 'transparent',
-                    boxShadow: type === t ? '0 0 0 3px rgba(255, 107, 157, 0.1)' : 'none',
+                    background: type === t ? 'rgba(255, 160, 112, 0.08)' : 'transparent',
+                    boxShadow: type === t ? '0 0 0 3px rgba(255, 160, 112, 0.15)' : 'none',
                   }}
                 >
                   <div style={{ fontSize: '32px', marginBottom: '8px' }}>{t === 'Tutor' ? '🏠' : '⚕️'}</div>
