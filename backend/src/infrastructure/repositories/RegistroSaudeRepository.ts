@@ -6,6 +6,5 @@ export interface RegistroSaudeRepository {
   delete(id: number): void;
   findById(id: number): RegistroSaude | null;
   findAll(ownerId: number): RegistroSaude[];
-  findAllSharedWithVet(vetUserId: number): RegistroSaude[];
   findByPetId(petId: number, filter?: { tipoRegistro?: TipoRegistro }): RegistroSaude[];
 }

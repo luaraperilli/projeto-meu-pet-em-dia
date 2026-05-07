@@ -76,17 +76,4 @@ export class SqliteRegistroSaudeRepository implements RegistroSaudeRepository {
     `;
     return db.prepare(sql).all(ownerId) as RegistroSaude[];
   }
-
-  findAllSharedWithVet(vetUserId: number): RegistroSaude[] {
-    const sql = `
-      SELECT r.*, p.name AS petName, p.species AS petSpecies, p.photoPath, u.name AS ownerName
-      FROM registros_saude r
-      JOIN pets p ON r.petId = p.id
-      JOIN pet_access pa ON pa.petId = p.id
-      JOIN users u ON p.ownerId = u.id
-      WHERE pa.vetUserId = ?
-      ORDER BY r.data DESC, r.horario DESC
-    `;
-    return db.prepare(sql).all(vetUserId) as RegistroSaude[];
-  }
 }

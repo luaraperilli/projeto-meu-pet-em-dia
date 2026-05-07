@@ -1,94 +1,44 @@
-# 🐾 Meu Pet em Dia
+# 🐾 Meu Pet em Dia — Entrega 1 (Sprints 1-3)
 
-Sistema fullstack de gestão de saúde para pets, conectando tutores e veterinários — implementação alinhada ao [Planejamento SCRUM](documentation/) do Grupo 8 (Desenvolvimento de Sistemas Web — UNIFEI 2026.1).
+Sistema fullstack de gestão de saúde para pets — **branch da Entrega 1** do Planejamento SCRUM do Grupo 8 (Desenvolvimento de Sistemas Web — UNIFEI 2026.1).
 
-## Funcionalidades
+> 📝 **Branch `sprints1-3`** — contém apenas as features das primeiras 3 sprints. Para o estado completo (Sprints 1-6), veja a `main`.
 
-**Cadastro & autenticação** (RF1)
+## Funcionalidades nesta branch
 
-- Registro de tutores e veterinários (com CRMV + documentos)
-- Login JWT, edição do próprio perfil, exclusão de conta (LGPD)
-- Recuperação de senha por email (token de 1h)
-- Aceite de Termos/Política de Privacidade no cadastro
+**Sprint 1 — Fundação & Autenticação** (RF1.1-1.4, RNF1.1, RNF1.3, RNF4.1, RNF5.2-5.3)
 
-**Pets, Agenda e Saúde** (RF2-RF4)
+- Cadastro de tutores e veterinários (com CRMV + documentos)
+- Login JWT com bcrypt para hash de senha
+- Logout
+- Estrutura DDD em 4 camadas
+- Docker Compose
 
-- CRUD de pets com foto
-- Agenda de consultas, vacinas, banhos, vermífugos
-- Registros de saúde com upload de exames (PDF/PNG/JPG)
-- **Compartilhamento controlado:** tutor concede acesso a vet por email; vet vê pets compartilhados
+**Sprint 2 — Perfil & Pets** (RF1.5-1.6, RF2.1-2.4, RNF1.2, RNF3.2)
 
-**Financeiro** (RF5)
+- Edição do próprio perfil + exclusão de conta (LGPD)
+- Recuperação de senha por email (token de 1h, mockado em dev)
+- CRUD completo de pets com foto
+- UI responsiva
+- Termos de Uso / Política de Privacidade no cadastro
 
-- Registro de gastos por categoria (Consulta, Vacina, Medicamento, Exame, Suprimento, Outros)
-- Filtros por categoria, total automático
+**Sprint 3 — Agenda & Histórico** (RF3.1-3.3, RF4.1, RF4.4, RNF2.1, RNF3.1)
 
-**Estoque** (RF6)
+- Agendamento de consultas, vacinas, banhos, vermífugos
+- Edição/cancelamento de agendamentos
+- Notificações in-app de compromissos próximos (sininho com badge)
+- Registros de saúde (vacinas, cirurgias, exames, observações) com upload de PDF/PNG/JPG
+- Consulta do histórico completo do pet
 
-- Cadastro de suprimentos (ração, medicamentos, etc) com quantidade, unidade e consumo diário
-- Cálculo automático de dias restantes e alerta quando próximo da reposição
+## Funcionalidades adiadas para Sprints 4-6 (branch `main`)
 
-**Relatórios** (RF7)
-
-- Relatório de saúde por pet/período (registros + agenda)
-- Relatório de gastos por período (total, por categoria, por pet)
-- **Exportação em PDF** (via `pdfkit`)
-
-**Avaliações** (RF8)
-
-- Avaliação de profissionais (1-5 estrelas + comentário)
-- Listagem pública com filtros (profissional, nota)
-
-**Notificações** (RF3.3 + RF6.2)
-
-- Notificações in-app (sininho com badge no navbar)
-- Compromissos próximos (próximos 7 dias) e suprimentos próximos da reposição
-- Atualização automática a cada 60s
-
-**Admin** (RF9)
-
-- CRUD de usuários protegido por `x-admin-key`
+Compartilhamento vet-tutor (RF4.2), Financeiro (RF5), Estoque (RF6), Relatórios PDF (RF7), Avaliações (RF8), Painel administrativo (RF9), LGPD avançado, testes E2E completos, revisões finais.
 
 ## Stack
 
-- **Frontend:** React 18 + TypeScript, Vite, React Router, React Hook Form. CSS variables + estilos inline
-- **Backend:** Node.js + Express + TypeScript, SQLite (`better-sqlite3`), JWT, **Bcrypt** para hash de senha (RNF1.1), Multer para uploads, `pdfkit` para relatórios
-- **Arquitetura:** DDD em 4 camadas — `domain/` (entidades), `application/` (casos de uso), `infrastructure/` (repositórios SQLite), `presentation/` (rotas Express)
-
-## Estrutura
-
-```
-projeto-meu-pet-em-dia/
-├── backend/
-│   ├── src/
-│   │   ├── domain/                # User, Pet, Agenda, RegistroSaude, Financeiro, Suprimento,
-│   │   │                          # Avaliacao, PetAccess, PasswordResetToken
-│   │   ├── application/           # Casos de uso por entidade (CreateXxx, UpdateXxx, etc)
-│   │   │   ├── auth/              # RequestPasswordReset, ConfirmPasswordReset
-│   │   │   ├── relatorios/        # GerarRelatorioSaude, GerarRelatorioGastos
-│   │   │   └── notificacao/       # ListarNotificacoes
-│   │   ├── infrastructure/        # db.ts (schema SQLite) + repositories/
-│   │   ├── presentation/          # routes/ + middleware/auth.ts
-│   │   ├── scripts/seed.ts        # Cria 3 usuários de teste
-│   │   └── index.ts
-│   └── .env.example
-│
-├── frontend/
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── components/        # Forms, Lists, Modals, Pages para cada entidade
-│   │   │   ├── providers/         # AuthProvider
-│   │   │   └── routes/AppRoutes.tsx
-│   │   ├── lib/api.ts
-│   │   ├── types/                 # Tipos espelhados do backend
-│   │   ├── utils/                 # Máscaras de CPF/telefone
-│   │   └── styles/global.css
-│   └── .env.example
-│
-├── testes/                        # E2E Selenium (Python)
-├── documentation/                 # Planejamento SCRUM, guias arquiteturais
-└── docker-compose.yml
-```
+- **Frontend:** React 18 + TypeScript, Vite, React Router, React Hook Form
+- **Backend:** Node.js + Express + TypeScript, SQLite, JWT, **bcrypt** (RNF1.1)
+- **Arquitetura:** DDD em 4 camadas — `domain/`, `application/`, `infrastructure/`, `presentation/`
 
 ## 🚀 Como Rodar Localmente
 
@@ -98,33 +48,31 @@ projeto-meu-pet-em-dia/
 
 - **Node.js 18+** ([download](https://nodejs.org/))
 - **Git**
-- (Opcional) Docker Desktop — só se quiser rodar com `docker compose` em vez de npm
 
-### 1. Clone e entre na pasta
+### 1. Clone e mude para a branch
 
 ```powershell
 git clone https://github.com/luaraperilli/projeto-meu-pet-em-dia.git
 cd projeto-meu-pet-em-dia
+git checkout sprints1-3
 ```
 
 ### 2. Terminal 1 — Backend
 
 ```powershell
 cd backend
-cp .env.example .env             # ou copie manualmente; valores default funcionam pra dev local
+cp .env.example .env             # default funciona pra dev local
 npm install                      # 2-3 min (compila better-sqlite3 nativo)
-npm run seed                     # cria os 3 usuários de teste
+npm run seed                     # cria os 2 usuários de teste
 npm run dev                      # API em http://localhost:3001
 ```
-
-Deixe esse terminal rodando.
 
 ### 3. Terminal 2 — Frontend
 
 ```powershell
 cd frontend
-cp .env.example .env.local       # default já aponta pro backend local
-npm install                      # 1-2 min
+cp .env.example .env.local
+npm install
 npm run dev                      # UI em http://localhost:5173
 ```
 
@@ -132,122 +80,60 @@ Abra http://localhost:5173 no navegador.
 
 ### 👥 Usuários de teste
 
-Após `npm run seed`, esses 3 usuários ficam disponíveis. Senha de todos: **`Teste@123`**
+Senha de todos: **`Teste@123`**
 
-| Email | Perfil | Role | O que testar |
-|---|---|---|---|
-| `admin@test.com` | Tutor | **admin** | Todas as funcionalidades do tutor + painel "Gerenciar Usuários" |
-| `tutor@test.com` | Tutor | user | Pets, Agenda, Saúde, Financeiro, Estoque, Avaliações, Relatórios |
-| `vet@test.com` | Veterinário | user | Acessa pets compartilhados pelo tutor + edita registros de saúde deles |
+| Email | Perfil | O que testar |
+|---|---|---|
+| `tutor@test.com` | Tutor | Cadastro/edição de pets, agenda, registros de saúde, notificações |
+| `vet@test.com` | Veterinário | Login + dados de perfil (sem features de leitura/escrita por enquanto — vem na Sprint 4) |
 
-> 💡 **Pra testar o fluxo Tutor↔Vet:** logue como `tutor@test.com`, vá em **Meus Pets**, clique no botão 🔐 (Gerenciar acessos) de um pet, conceda acesso a `vet@test.com`. Deslogue e logue como vet — você verá o pet em "Pets Compartilhados" e poderá criar registros de saúde nele.
+> 💡 O seed já popula 2 pets, 3 agendamentos e 4 registros de saúde para o tutor.
 
 ### Problemas comuns
 
 | Problema | Solução |
 |---|---|
-| `bcrypt` não verifica senhas antigas (você tinha o app.db anterior) | Apague `backend/data/app.db*` e rode `npm run seed` de novo |
-| Porta 3001 ou 5173 ocupada | Mate o processo: `netstat -ano \| findstr :3001` → `taskkill /PID <pid> /F` |
+| Porta 3001 ou 5173 ocupada | `netstat -ano \| findstr :3001` → `taskkill /PID <pid> /F` |
 | `better-sqlite3` falha no `npm install` (Windows) | Instale build tools: `npm install --global windows-build-tools` (admin) |
-| Erro de senha ao logar com novos usuários | Confirma se rodou `npm run seed` no backend |
-| IDE mostra erros de TS que não aparecem em `npm run dev` | Reinicia o TS Server: `Ctrl+Shift+P` → "TypeScript: Restart TS Server" |
+| Erro de senha ao logar | Confirma se rodou `npm run seed` |
+| IDE com erros TS antigos | Reinicia o TS Server: `Ctrl+Shift+P` → "TypeScript: Restart TS Server" |
 
-### Comandos úteis
+## 📡 Endpoints da API
 
-```powershell
-# Backend
-npm run dev                      # dev server com hot-reload
-npm run build                    # build pra produção
-npm run start                    # roda o build
-npm run seed                     # recria usuários de teste
-npm run format                   # aplica Prettier
+Rotas autenticadas exigem `Authorization: Bearer <token>`.
 
-# Frontend
-npm run dev                      # dev server Vite
-npm run build                    # build pra produção
-npm run preview                  # serve o build
-npm run typecheck                # tsc --noEmit
-npm run format                   # aplica Prettier
-```
+| Recurso | Métodos |
+|---|---|
+| `/auth` | `POST /register`, `POST /login`, `GET/PUT/DELETE /me`, `POST /forgot-password`, `POST /reset-password` |
+| `/pets` | `GET`, `POST` (multipart com foto), `PUT /:id`, `DELETE /:id` |
+| `/agenda` | `GET`, `GET /pet/:petId`, `POST`, `PUT /:id`, `DELETE /:id` |
+| `/registros_saude` | `GET`, `POST` (multipart com PDF/PNG/JPG), `PUT /:id`, `DELETE /:id` |
+| `/notificacoes` | `GET` (compromissos próximos) |
+| `/health` | `GET` |
 
-### Alternativa: Docker
+## 🗄️ Banco de Dados
 
-Se preferir rodar tudo num comando só (precisa do Docker Desktop aberto):
+SQLite em `backend/data/app.db` (auto-criado). Schema completo em [backend/src/infrastructure/db.ts](backend/src/infrastructure/db.ts).
 
-```powershell
-docker compose up -d --build
-# Frontend: http://localhost:8088   Backend: http://localhost:3001
-```
+Tabelas: `users`, `pets`, `agenda`, `registros_saude`, `password_reset_tokens`. Todas com `ON DELETE CASCADE`.
 
-## Endpoints
-
-Rotas autenticadas exigem `Authorization: Bearer <token>`. Rotas `/admin/*` exigem `x-admin-key`.
-
-| Recurso              | Métodos principais                                                                  |
-| -------------------- | ----------------------------------------------------------------------------------- |
-| `/auth`              | `POST /register`, `POST /login`, `GET/PUT/DELETE /me`, `POST /forgot-password`, `POST /reset-password` |
-| `/admin/users`       | `POST`, `GET` (filtros: `type`, `q`), `GET /:id`, `PUT /:id`, `DELETE /:id`         |
-| `/pets`              | `GET`, `POST`, `PUT /:id`, `DELETE /:id`                                            |
-| `/agenda`            | `GET`, `GET /pet/:petId`, `POST`, `PUT /:id`, `DELETE /:id`                         |
-| `/registros_saude`   | `GET`, `POST` (multipart), `PUT /:id`, `DELETE /:id`                                |
-| `/financeiro`        | `GET` (filtros: `petId`, `categoria`, `from`, `to`), `POST`, `PUT /:id`, `DELETE /:id` |
-| `/suprimentos`       | `GET`, `POST`, `PUT /:id`, `DELETE /:id`                                            |
-| `/avaliacoes`        | `GET` (filtros: `profissional`, `servico`, `nota`), `POST`, `PUT /:id`, `DELETE /:id` |
-| `/pet-access`        | `GET /shared-with-me` (vet), `GET /pet/:petId`, `POST /pet/:petId`, `DELETE /pet/:petId/vet/:vetUserId` |
-| `/relatorios`        | `GET /saude?petId&from&to[&format=pdf]`, `GET /gastos?from&to[&petId][&format=pdf]` |
-| `/notificacoes`      | `GET`                                                                               |
-| `/health`            | `GET`                                                                               |
-
-## Banco de Dados
-
-SQLite em `backend/data/app.db` (auto-criado). Schema em [backend/src/infrastructure/db.ts](backend/src/infrastructure/db.ts).
-
-Tabelas: `users`, `pets`, `agenda`, `registros_saude`, `financeiro`, `suprimentos`, `avaliacoes`, `pet_access`, `password_reset_tokens`. Todas com `ON DELETE CASCADE` para manter integridade.
-
-## Validações
+## ✅ Validações
 
 - **Nome / Raça / Anotações**: 3–100 caracteres
 - **Email**: 10–256 caracteres
 - **CPF**: 11 dígitos, formato `000.000.000-00`
 - **Celular**: `(00) 00000-0000`
 - **Senha**: 8–12 chars, ≥1 maiúscula, ≥1 número, ≥1 caractere especial (RNF1.3)
-- **Anexo de registro de saúde**: PDF/PNG/JPG, máx 5MB (RF4.3)
-- **Foto de pet**: PNG/JPG/WEBP/GIF, máx 5MB (RNF2.2)
-- **Avaliação**: nota 1-5 inteiro, comentário até 500 chars
+- **Anexo de registro de saúde**: PDF/PNG/JPG, máx 5MB (RF4.3 — *avançado vem na Sprint 4*)
+- **Foto de pet**: PNG/JPG/WEBP/GIF, máx 5MB
 
-Implementação em [backend/src/application/validators.ts](backend/src/application/validators.ts).
-
-## Segurança & LGPD
+## 🔐 Segurança
 
 - **Hash de senha:** Bcrypt (10 rounds) — RNF1.1
-- **JWT** com expiração de 7 dias (segredo via `JWT_SECRET`)
-- **Reset de senha:** token aleatório de 32 bytes, expira em 1h, marcado como usado após consumo
-- **LGPD** (RNF6.1):
-  - Checkbox obrigatório de aceite no cadastro
-  - Página de [Termos de Uso e Política de Privacidade](frontend/src/app/components/TermosPage.tsx) acessível em `/termos`
-  - **Direito de exclusão:** usuário pode deletar a própria conta em "Meu Perfil" (cascade remove todos os dados)
-  - **Direito de portabilidade:** relatórios exportáveis em PDF
-- **CRMV** validado para profissionais (RNF6.2)
+- **JWT** com expiração de 7 dias
+- **Reset de senha:** token aleatório de 32 bytes, expira em 1h. Em dev, o token aparece no **console do backend** (integração SMTP fica para etapa de produção)
 
-## Notificações & Email (modo dev)
-
-- **Notificações in-app:** funcionais (badge no sininho atualiza a cada 60s, página `/notificacoes` lista compromissos próximos + suprimentos a repor).
-- **Email de recuperação de senha:** token é gerado e impresso no **console do backend**. Para produção, substitua o `console.log` em [routes/auth.ts](backend/src/presentation/routes/auth.ts) (`/forgot-password`) por integração com SMTP/SendGrid/Resend.
-
-## Testes E2E (Selenium)
-
-Em [testes/](testes/). Para rodar com janela visível e delay entre ações:
-
-```powershell
-cd testes
-$env:MEUPET_HEADLESS='0'; $env:MEUPET_E2E_DELAY='1'
-.\run.ps1                                  # todos
-python .\test_pets_flow.py                 # individual
-```
-
-> ⚠️ Os testes E2E foram escritos antes das novas features (Financeiro, Estoque, Avaliações). Cobertura atual: registro/login, pets, agenda, registros de saúde, admin de usuários.
-
-## Documentação Adicional
+## 📚 Documentação adicional
 
 - [Planejamento SCRUM (Grupo 8)](documentation/)
 - [Guia de Arquitetura](documentation/GUIA_ARQUITETURAL.md)

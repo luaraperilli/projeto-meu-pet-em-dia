@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { API_BASE_URL } from '@lib/api';
 import { Pet, PetSpecies } from '../../types/Pet';
-import { PetAccessModal } from './PetAccessModal';
 
 export function PetList({ onEdit, onRefresh }: { onEdit: (p: Pet) => void; onRefresh: () => void }) {
   const [pets, setPets] = useState<Pet[]>([]);
@@ -9,7 +8,6 @@ export function PetList({ onEdit, onRefresh }: { onEdit: (p: Pet) => void; onRef
   const [error, setError] = useState('');
   const [name, setName] = useState('');
   const [species, setSpecies] = useState<'Todos' | PetSpecies>('Todos');
-  const [accessPet, setAccessPet] = useState<Pet | null>(null);
 
   async function load() {
     setLoading(true);
@@ -159,13 +157,6 @@ export function PetList({ onEdit, onRefresh }: { onEdit: (p: Pet) => void; onRef
                         Editar
                       </button>
                       <button
-                        onClick={() => setAccessPet(p)}
-                        style={{ padding: '8px 12px', fontSize: 'var(--text-xs)' }}
-                        title="Gerenciar acessos de veterinários"
-                      >
-                        Acessos
-                      </button>
-                      <button
                         data-testid={`pet-delete-${p.id}`}
                         className="danger"
                         onClick={() => onDelete(p.id)}
@@ -181,8 +172,6 @@ export function PetList({ onEdit, onRefresh }: { onEdit: (p: Pet) => void; onRef
           </table>
         </div>
       )}
-
-      <PetAccessModal isOpen={!!accessPet} onClose={() => setAccessPet(null)} pet={accessPet} />
     </div>
   );
 }

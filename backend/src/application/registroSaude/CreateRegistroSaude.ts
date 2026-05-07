@@ -1,13 +1,11 @@
 import { RegistroSaude, RegistroSaudeInputDTO, TipoRegistro } from '../../domain/RegistroSaude';
 import { RegistroSaudeRepository } from '../../infrastructure/repositories/RegistroSaudeRepository';
 import { PetRepository } from '../../infrastructure/repositories/PetRepository';
-import { PetAccessRepository } from '../../infrastructure/repositories/PetAccessRepository';
 
 const TIPOS_VALIDOS: readonly string[] = ['Vacina', 'Cirurgia', 'Exame', 'Observação'];
 
 export type CreateRegistroSaudeInput = {
   userId: number;
-  userType: 'Tutor' | 'Veterinário';
   data: Omit<RegistroSaudeInputDTO, 'filePath' | 'userId'> & {
     petId: number;
     fileData: { buffer: Buffer; mimeType: string; originalName: string } | null;
@@ -18,19 +16,15 @@ export class CreateRegistroSaude {
   constructor(
     private readonly registroRepo: RegistroSaudeRepository,
     private readonly petRepo: PetRepository,
-    private readonly petAccessRepo: PetAccessRepository,
   ) {}
 
   execute(input: CreateRegistroSaudeInput): RegistroSaude {
-    const { data, userId, userType } = input;
+    const { data, userId } = input;
     const errors: Record<string, string> = {};
 
     const pet = this.petRepo.findById(data.petId);
     if (!pet) throw new Error('PetNotFound');
-
-    const isOwner = pet.ownerId === userId;
-    const isSharedVet = userType === 'Veterinário' && this.petAccessRepo.hasAccess(data.petId, userId);
-    if (!isOwner && !isSharedVet) throw new Error('PetAccessDenied');
+    if (pet.ownerId !== userId) throw new Error('PetAccessDenied');
 
     const profissionalLimpo = data.profissional?.trim() || '';
 

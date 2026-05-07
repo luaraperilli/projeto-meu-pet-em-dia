@@ -5,7 +5,6 @@ import fs from 'node:fs';
 import { requireAuth } from '../middleware/auth';
 import { SqliteRegistroSaudeRepository } from '../../infrastructure/repositories/SqliteRegistroSaudeRepository';
 import { SqlitePetRepository } from '../../infrastructure/repositories/SqlitePetRepository';
-import { SqlitePetAccessRepository } from '../../infrastructure/repositories/SqlitePetAccessRepository';
 import { CreateRegistroSaude } from '../../application/registroSaude/CreateRegistroSaude';
 import { UpdateRegistroSaude } from '../../application/registroSaude/UpdateRegistroSaude';
 import { DeleteRegistroSaude } from '../../application/registroSaude/DeleteRegistroSaude';
@@ -45,8 +44,7 @@ registrosSaudeRouter.get('/', (req: any, res) => {
   try {
     const registroRepo = new SqliteRegistroSaudeRepository();
     const list = new ListRegistroSaude(registroRepo);
-    const registros = list.execute({ userId: req.user.id, userType: req.user.type });
-    res.json(registros);
+    res.json(list.execute({ userId: req.user.id }));
   } catch (error: any) {
     res.status(400).json({ message: error.message || 'Erro ao buscar registros de saúde' });
   }
@@ -56,8 +54,7 @@ registrosSaudeRouter.post('/', upload.single('file'), (req: any, res) => {
   try {
     const registroRepo = new SqliteRegistroSaudeRepository();
     const petRepo = new SqlitePetRepository();
-    const accessRepo = new SqlitePetAccessRepository();
-    const create = new CreateRegistroSaude(registroRepo, petRepo, accessRepo);
+    const create = new CreateRegistroSaude(registroRepo, petRepo);
 
     const file = req.file;
     const body = req.body;
@@ -65,7 +62,6 @@ registrosSaudeRouter.post('/', upload.single('file'), (req: any, res) => {
 
     const novoRegistro = create.execute({
       userId: req.user.id,
-      userType: req.user.type,
       data: {
         petId: Number(body.petId),
         tipoRegistro: body.tipoRegistro,
@@ -89,8 +85,7 @@ registrosSaudeRouter.put('/:id', upload.single('file'), (req: any, res) => {
   try {
     const registroRepo = new SqliteRegistroSaudeRepository();
     const petRepo = new SqlitePetRepository();
-    const accessRepo = new SqlitePetAccessRepository();
-    const update = new UpdateRegistroSaude(registroRepo, petRepo, accessRepo);
+    const update = new UpdateRegistroSaude(registroRepo, petRepo);
 
     const file = req.file;
     const body = req.body;
@@ -99,7 +94,6 @@ registrosSaudeRouter.put('/:id', upload.single('file'), (req: any, res) => {
     const registroAtualizado = update.execute({
       registroId: Number(req.params.id),
       userId: req.user.id,
-      userType: req.user.type,
       data: {
         data: body.data,
         horario: body.horario,
@@ -119,12 +113,10 @@ registrosSaudeRouter.delete('/:id', (req: any, res) => {
   try {
     const registroRepo = new SqliteRegistroSaudeRepository();
     const petRepo = new SqlitePetRepository();
-    const accessRepo = new SqlitePetAccessRepository();
-    const del = new DeleteRegistroSaude(registroRepo, petRepo, accessRepo);
+    const del = new DeleteRegistroSaude(registroRepo, petRepo);
     del.execute({
       registroId: Number(req.params.id),
       userId: req.user.id,
-      userType: req.user.type,
     });
     res.status(204).send();
   } catch (error: any) {

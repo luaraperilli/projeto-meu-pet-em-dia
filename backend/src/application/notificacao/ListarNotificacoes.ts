@@ -2,7 +2,7 @@ import { db } from '../../infrastructure/db';
 
 export type Notificacao = {
   id: string;
-  tipo: 'agenda' | 'suprimento';
+  tipo: 'agenda';
   titulo: string;
   descricao: string;
   data: string;
@@ -16,8 +16,8 @@ export class ListarNotificacoes {
     const notificacoes: Notificacao[] = [];
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
-    const limiteAgenda = new Date(hoje);
-    limiteAgenda.setDate(limiteAgenda.getDate() + DEFAULT_AGENDA_DIAS);
+    const limite = new Date(hoje);
+    limite.setDate(limite.getDate() + DEFAULT_AGENDA_DIAS);
 
     const agendamentos = db
       .prepare(
@@ -27,7 +27,7 @@ export class ListarNotificacoes {
          WHERE p.ownerId = ? AND a.data >= ? AND a.data <= ?
          ORDER BY a.data, a.horario`,
       )
-      .all(userId, hoje.toISOString().slice(0, 10), limiteAgenda.toISOString().slice(0, 10)) as Array<{
+      .all(userId, hoje.toISOString().slice(0, 10), limite.toISOString().slice(0, 10)) as Array<{
       id: number;
       petName: string;
       procedimento: string;
@@ -45,34 +45,6 @@ export class ListarNotificacoes {
         data: a.data,
         diasRestantes: Math.max(0, dias),
       });
-    }
-
-    const suprimentos = db
-      .prepare(
-        `SELECT * FROM suprimentos
-         WHERE userId = ? AND consumoDiario IS NOT NULL AND consumoDiario > 0`,
-      )
-      .all(userId) as Array<{
-      id: number;
-      nome: string;
-      quantidade: number;
-      unidade: string;
-      consumoDiario: number;
-      diasAlerta: number;
-    }>;
-
-    for (const s of suprimentos) {
-      const diasRestantes = Math.floor(s.quantidade / s.consumoDiario);
-      if (diasRestantes <= s.diasAlerta) {
-        notificacoes.push({
-          id: `suprimento-${s.id}`,
-          tipo: 'suprimento',
-          titulo: `Repor ${s.nome}`,
-          descricao: `Restam ${s.quantidade} ${s.unidade} (~${diasRestantes} dias com consumo atual)`,
-          data: hoje.toISOString().slice(0, 10),
-          diasRestantes,
-        });
-      }
     }
 
     return notificacoes.sort((a, b) => a.diasRestantes - b.diasRestantes);

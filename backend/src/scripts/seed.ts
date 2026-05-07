@@ -3,26 +3,12 @@ import { SqliteUserRepository } from '../infrastructure/repositories/SqliteUserR
 import { SqlitePetRepository } from '../infrastructure/repositories/SqlitePetRepository';
 import { SqliteAgendaRepository } from '../infrastructure/repositories/SqliteAgendaRepository';
 import { SqliteRegistroSaudeRepository } from '../infrastructure/repositories/SqliteRegistroSaudeRepository';
-import { SqliteFinanceiroRepository } from '../infrastructure/repositories/SqliteFinanceiroRepository';
-import { SqliteSuprimentoRepository } from '../infrastructure/repositories/SqliteSuprimentoRepository';
-import { SqliteAvaliacaoRepository } from '../infrastructure/repositories/SqliteAvaliacaoRepository';
-import { SqlitePetAccessRepository } from '../infrastructure/repositories/SqlitePetAccessRepository';
 import { CreateUser, CreateUserInput } from '../application/CreateUser';
 import { User } from '../domain/User';
 
 const PASSWORD = 'Teste@123';
 
 const SEED_USERS: CreateUserInput[] = [
-  {
-    name: 'Administrador de Teste',
-    email: 'admin@test.com',
-    cpf: '111.111.111-11',
-    type: 'Tutor',
-    phone: '(11) 99999-1111',
-    address: 'Endereço de teste, 100 — São Paulo/SP',
-    password: PASSWORD,
-    role: 'admin',
-  },
   {
     name: 'Tutor de Teste',
     email: 'tutor@test.com',
@@ -52,16 +38,11 @@ function isoDateOffset(days: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-function seedTutorData(tutor: User, vet: User) {
+function seedTutorData(tutor: User) {
   const petRepo = new SqlitePetRepository();
   const agendaRepo = new SqliteAgendaRepository();
   const registroRepo = new SqliteRegistroSaudeRepository();
-  const financeiroRepo = new SqliteFinanceiroRepository();
-  const suprimentoRepo = new SqliteSuprimentoRepository();
-  const avaliacaoRepo = new SqliteAvaliacaoRepository();
-  const accessRepo = new SqlitePetAccessRepository();
 
-  // Pets
   const mel = petRepo.create({
     ownerId: tutor.id!,
     name: 'Mel',
@@ -88,7 +69,6 @@ function seedTutorData(tutor: User, vet: User) {
   });
   console.log(`  pets: ${mel.name}, ${frederico.name}`);
 
-  // Agenda (próximos compromissos pra acionar notificação)
   agendaRepo.create({
     petId: mel.id!,
     procedimento: 'Vacina',
@@ -115,7 +95,6 @@ function seedTutorData(tutor: User, vet: User) {
   });
   console.log('  agenda: 3 compromissos');
 
-  // Registros de saúde
   registroRepo.create({
     petId: mel.id!,
     userId: tutor.id!,
@@ -153,102 +132,6 @@ function seedTutorData(tutor: User, vet: User) {
     filePath: null,
   });
   console.log('  registros de saúde: 4');
-
-  // Financeiro (gastos com acentos)
-  financeiroRepo.create({
-    userId: tutor.id!,
-    petId: mel.id!,
-    categoria: 'Vacina',
-    data: isoDateOffset(-180),
-    valor: 150.0,
-    observacoes: 'Reforço antirrábica anual',
-  });
-  financeiroRepo.create({
-    userId: tutor.id!,
-    petId: mel.id!,
-    categoria: 'Consulta',
-    data: isoDateOffset(-90),
-    valor: 250.0,
-    observacoes: 'Pré-operatório de castração',
-  });
-  financeiroRepo.create({
-    userId: tutor.id!,
-    petId: frederico.id!,
-    categoria: 'Exame',
-    data: isoDateOffset(-30),
-    valor: 320.5,
-    observacoes: 'Hemograma completo e função renal',
-  });
-  financeiroRepo.create({
-    userId: tutor.id!,
-    petId: mel.id!,
-    categoria: 'Suprimento',
-    data: isoDateOffset(-7),
-    valor: 189.9,
-    observacoes: 'Ração premium 15kg',
-  });
-  console.log('  financeiro: 4 lançamentos');
-
-  // Suprimentos (com alerta de reposição)
-  suprimentoRepo.create({
-    userId: tutor.id!,
-    petId: mel.id!,
-    nome: 'Ração Premium 15kg',
-    categoria: 'Ração',
-    quantidade: 3,
-    unidade: 'kg',
-    consumoDiario: 0.4,
-    diasAlerta: 10,
-  });
-  suprimentoRepo.create({
-    userId: tutor.id!,
-    petId: frederico.id!,
-    nome: 'Antipulgas Bravecto',
-    categoria: 'Medicamento',
-    quantidade: 2,
-    unidade: 'comprimidos',
-    consumoDiario: null,
-    diasAlerta: 30,
-  });
-  suprimentoRepo.create({
-    userId: tutor.id!,
-    petId: null,
-    nome: 'Areia sanitária',
-    categoria: 'Higiene',
-    quantidade: 4,
-    unidade: 'kg',
-    consumoDiario: 0.5,
-    diasAlerta: 7,
-  });
-  console.log('  suprimentos: 3');
-
-  // Avaliações (notas + comentários com acentos)
-  avaliacaoRepo.create({
-    userId: tutor.id!,
-    profissional: 'Dr. José da Silva',
-    servico: 'Consulta veterinária',
-    nota: 5,
-    comentario: 'Atencioso, explicou o tratamento com clareza e foi muito carinhoso com a Mel.',
-  });
-  avaliacaoRepo.create({
-    userId: tutor.id!,
-    profissional: 'Dra. Mariana Oliveira',
-    servico: 'Exame de sangue',
-    nota: 4,
-    comentario: 'Resultado rápido, mas precisei ligar pra clínica pra receber o laudo.',
-  });
-  avaliacaoRepo.create({
-    userId: tutor.id!,
-    profissional: 'Pet Shop Felicidade',
-    servico: 'Banho e tosa',
-    nota: 5,
-    comentario: 'Mel ficou linda e cheirosa! Recomendo demais.',
-  });
-  console.log('  avaliações: 3');
-
-  // Compartilhamento com vet (RF4.2): vet tem acesso à Mel
-  accessRepo.grant(mel.id!, vet.id!);
-  console.log(`  pet-access: ${vet.email} → ${mel.name}`);
 }
 
 async function main() {
@@ -269,13 +152,11 @@ async function main() {
   }
 
   const tutor = created['tutor@test.com'];
-  const vet = created['vet@test.com'];
 
-  // Só popula dados extras se o tutor foi criado agora (evita duplicação)
   const tutorPets = new SqlitePetRepository().findAllByOwner(tutor.id!, {});
   if (tutorPets.length === 0) {
     console.log('[SEED] populando dados de exemplo para o tutor...');
-    seedTutorData(tutor, vet);
+    seedTutorData(tutor);
   } else {
     console.log('[SEED] tutor já tem dados, pulando dados de exemplo');
   }

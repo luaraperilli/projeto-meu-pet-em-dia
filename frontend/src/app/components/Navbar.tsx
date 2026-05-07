@@ -48,19 +48,8 @@ export function Navbar() {
           { path: '/pets', label: 'Pets', icon: '🐾' },
           { path: '/agenda', label: 'Agenda', icon: '📅' },
           { path: '/registros-saude', label: 'Saúde', icon: '💉' },
-          { path: '/financeiro', label: 'Financeiro', icon: '💰' },
-          { path: '/estoque', label: 'Estoque', icon: '📦' },
-          { path: '/relatorios', label: 'Relatórios', icon: '📊' },
         ]
       : []),
-    ...(user.type === 'Veterinário'
-      ? [
-          { path: '/pets-compartilhados', label: 'Pets', icon: '🐾' },
-          { path: '/registros-saude', label: 'Saúde', icon: '💉' },
-        ]
-      : []),
-    { path: '/avaliacoes', label: 'Avaliações', icon: '⭐' },
-    ...(user.role === 'admin' ? [{ path: '/admin/users', label: 'Usuários', icon: '🧑‍💼' }] : []),
   ];
 
   return (
